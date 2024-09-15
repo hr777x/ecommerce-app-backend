@@ -1,5 +1,25 @@
 import mongoose from 'mongoose';
 
+const reviewSchema = new mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
+        required: true
+    },
+    rating: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 5
+    },
+    comment: {
+        type: String,
+        required: true
+    }
+}, {
+    timestamps: true
+});
+
 const productSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -23,9 +43,10 @@ const productSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user',
         required: true
-    }
+    },
+    reviews: [reviewSchema] // Add reviews to product
 }, {
-    timestamps: true  // adds created_at and updated_at timestamps
+    timestamps: true
 });
 
 export default mongoose.model('Product', productSchema);

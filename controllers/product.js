@@ -76,3 +76,28 @@ export const getProductbyUser = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 };
+
+export const addReview = async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const { rating, comment, user } = req.body;
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        const review = {
+            user,
+            rating,
+            comment
+        };
+
+        product.reviews.push(review);
+        await product.save();
+
+        return res.status(200).json({ message: 'Review added successfully', product });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};

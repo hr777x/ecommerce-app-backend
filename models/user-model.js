@@ -1,36 +1,42 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-const userSchema = new mongoose.Schema({
-    name: {
+const cartItemSchema = new mongoose.Schema({
+    product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+        required: true
+    },
+    quantity: {
+        type: Number,
+        required: true,
+        default: 1
+    }
+});
+
+const paymentMethodSchema = new mongoose.Schema({
+    cardNumber: {
         type: String,
         required: true
     },
-    userName: {
+    expiryDate: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
-    password: {
+    cvv: {
         type: String,
-        required: true,
-        minlength: [8, "Password must be at least 8 characters long"]
-    },
-    email:{
-        type: String,
-        required: true,
-        unique: true
-    },
-    role: {
-        type: String,
-        Enum: ["customer", "admin", "superadmin"],
-        default: "customer"
+        required: true
     }
-},
-{
-    timestamps:true
-}
-);
+});
 
-const user = mongoose.model("user", userSchema);
+const userSchema = new mongoose.Schema({
+    name: String,
+    userName: String,
+    password: String,
+    email: String,
+    cart: [cartItemSchema], // Add cart to user schema
+    paymentMethod: paymentMethodSchema // Add payment method
+}, {
+    timestamps: true
+});
 
-export default user;
+export default mongoose.model('user', userSchema);
