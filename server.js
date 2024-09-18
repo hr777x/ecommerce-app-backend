@@ -15,7 +15,6 @@ app.use(bodyparser.urlencoded({extended: true}))
 app.use(bodyparser.json())
 app.use('/',userRoute)
 app.use('/api/products', productRoute);
-app.use('/register', registerUser)
 const port = process.env.port || 8080
 connectDB()
 app.listen(port,()=>{

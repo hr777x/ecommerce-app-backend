@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const cartItemSchema = new mongoose.Schema({
-    Product: {
+    product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
         required: true
@@ -34,7 +34,12 @@ const userSchema = new mongoose.Schema({
     password: String,
     email: String,
     cart: [cartItemSchema], // Add cart to user schema
-    paymentMethod: paymentMethodSchema // Add payment method
+    paymentMethod: paymentMethodSchema, // Add payment method
+    role: {
+        type: String,
+        enum: ['customer', 'admin', 'superadmin'], // Enum to restrict roles to specific values
+        default: 'customer', // Default role for new users
+    }
 }, {
     timestamps: true
 });

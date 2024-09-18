@@ -1,17 +1,19 @@
 import User from '../models/user-model.js';
+import Product from '../models/product-model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
 
 export const postUserData = async (req,res) =>{
     try {
         const {name, userName, password, email, cardNumber, expiryDate, cvv} = req.body;
         console.log(req.body);
-        const isEmailExisting = await user.findOne({email : email});
+        const isEmailExisting = await User.findOne({email : email});
         if(isEmailExisting){
             return res.status(400).json({message: "Email already exists"});
         }
-        const userData = new user({
+        const userData = new User({
             name,
             userName,
             password,
@@ -41,7 +43,7 @@ export const getUserData = async (req,res) => {
 export const getUserById = async (req, res) =>{
     try {
         const getuserId = req.params.id;
-        const userData = await user.findById(getuserId);
+        const userData = await User.findById(getuserId);
         if(!userData){
             return res.status(404).json({message: "User not found"});
         }
@@ -54,7 +56,7 @@ export const getUserById = async (req, res) =>{
 export const deleteUserById = async (req, res) => {
     try {
         const userId = req.params.id;
-        const deletedUser = await user.findByIdAndDelete(userId);
+        const deletedUser = await User.findByIdAndDelete(userId);
         if (!deletedUser) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -67,13 +69,13 @@ export const deleteUserById = async (req, res) => {
 export const registerUser = async (req, res) => {
     try {
         const userdata = req.body;
-        let isEmailExisting = await user.findOne({ email: userdata.email });
+        let isEmailExisting = await User.findOne({ email: userdata.email });
         if(isEmailExisting){
             return res.status(400).json({message: "Email already exists"});
         }
         const hashedPassword = await bcrypt.hash(userdata.password, 10);
         userdata.password = hashedPassword;
-        const User = await user.create(userdata);
+        const user = await User.create(userdata);
 
         return res.status(200).json({message: 'data saved successfully!',success : true , userdata})
     } catch (error) {   
@@ -87,6 +89,12 @@ export const addToCart = async (req, res) => {
     try {
         const { userId, productId, quantity } = req.body;
 
+        // Check if quantity is valid
+        if (quantity <= 0) {
+            return res.status(400).json({ message: 'Quantity must be greater than 0' });
+        }
+
+        // Find user and product
         const user = await User.findById(userId);
         const product = await Product.findById(productId);
         
@@ -94,19 +102,30 @@ export const addToCart = async (req, res) => {
             return res.status(404).json({ message: 'User or Product not found' });
         }
 
-        const cartItem = {
-            product: productId,
-            quantity
-        };
+        // Check if product is already in cart
+        const existingCartItem = user.cart.find(item => item.product.toString() === productId);
 
-        user.cart.push(cartItem);
+        if (existingCartItem) {
+            // Update the quantity if product is already in the cart
+            existingCartItem.quantity += quantity;
+        } else {
+            // Add new item to the cart
+            const cartItem = {
+                product: productId,
+                quantity
+            };
+            user.cart.push(cartItem);
+        }
+
+        // Save the user with updated cart
         await user.save();
 
-        return res.status(200).json({ message: 'Product added to cart', user });
+        return res.status(200).json({ message: 'Product added to cart', cart: user.cart });
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
 };
+
 
 
 export const addPaymentMethod = async (req, res) => {
@@ -140,10 +159,28 @@ export const loginUser = async (req, res) => {
                 return res.status(400).json({message: "Password is incorrect"});
             }
 
-            const jwttoken = jwt.sign({id: user.id, role: user.role}, process.env.PRIVATE_KEY, {expiresIn: "1h"});
+            const jwttoken = await jwt.sign({id: user.id, role: user.role}, process.env.PRIVATE_KEY, {expiresIn: "1h"});
+            res.cookie("jwt", jwttoken, {httpOnly: true, secure: true, maxAge: 5*60});
+            return res.status(200).json({message: "Login Successful", token: jwttoken,  user: {
+                id: user._id,
+                name: user.name,
+                userName: user.userName,
+                email: user.email,
+                role: user.role
+            }});
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
+};
+
+export const logoutUser = async (req, res) => {
+try {
+    res.clearCookie("jwt");
+    return res.status(200).json({message: "Logout Successful"});
+} catch (error) {
+    return res.status(500).json({ message: error.message });
 }
+
+};
 
 
