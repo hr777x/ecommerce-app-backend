@@ -1,5 +1,5 @@
 import express from 'express';
-import postUserData, { getUserById, getUserData, deleteUserById, registerUser, addToCart, addPaymentMethod } from '../controllers/user.js';
+import postUserData, { getUserById, getUserData, deleteUserById, registerUser, addToCart, addPaymentMethod, loginUser } from '../controllers/user.js';
 
 const userRoute = express.Router();
 
@@ -10,6 +10,7 @@ userRoute.delete('/delete/:id', deleteUserById);
 userRoute.post('/registerUser', registerUser);
 userRoute.post('/addToCart', addToCart);
 userRoute.post('/addPaymentMethod', addPaymentMethod);
+userRoute.post('/login', loginUser);
 
 
 export default userRoute;

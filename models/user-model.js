@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const cartItemSchema = new mongoose.Schema({
-    product: {
+    Product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
         required: true

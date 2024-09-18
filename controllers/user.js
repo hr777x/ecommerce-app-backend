@@ -1,5 +1,7 @@
 import User from '../models/user-model.js';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
 export const postUserData = async (req,res) =>{
     try {
@@ -124,5 +126,24 @@ export const addPaymentMethod = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 };
+
+export const loginUser = async (req, res) => {
+    try {
+        const userdata = req.body;
+        const user = await User.findOne({ email: userdata.email });
+        if(!user)
+            {
+                return res.status(404).json({message: "Invalid Email or Password"});
+            }
+            const isValidPassword = await bcrypt.compare(userdata.password, user.password);
+            if(!isValidPassword){
+                return res.status(400).json({message: "Password is incorrect"});
+            }
+
+            const jwttoken = jwt.sign({id: user.id, role: user.role}, process.env.PRIVATE_KEY, {expiresIn: "1h"});
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
 
 
