@@ -2,6 +2,7 @@ import express from 'express'
 import bodyparser from 'body-parser'
 import dotenv from 'dotenv'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 import { connectDB } from './config/db.js'
 import userRoute from './routes/user-routes.js'
 import productRoute from './routes/product-routes.js'
@@ -13,6 +14,8 @@ app.use(cors())
 app.use(express.json())
 app.use(bodyparser.urlencoded({extended: true}))
 app.use(bodyparser.json())
+app.use(cookieParser())
+
 app.use('/',userRoute)
 app.use('/api/products', productRoute);
 const port = process.env.port || 8080
