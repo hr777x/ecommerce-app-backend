@@ -1,5 +1,6 @@
 import express from 'express';
 import postUserData, { getUserById, getUserData, deleteUserById, registerUser, addToCart, addPaymentMethod, loginUser, logoutUser } from '../controllers/user.js';
+import { Middleware } from '../middleware/user-middleware.js';
 
 const userRoute = express.Router();
 
@@ -12,6 +13,6 @@ userRoute.post('/addToCart', addToCart);
 userRoute.post('/addPaymentMethod', addPaymentMethod);
 userRoute.post('/login', loginUser);
 userRoute.post('/register', registerUser);
-userRoute.post('/logout', logoutUser);
+userRoute.post('/logout', Middleware, logoutUser);
 
 export default userRoute;
