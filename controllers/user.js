@@ -2,8 +2,6 @@ import User from '../models/user-model.js';
 import Product from '../models/product-model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-import cookieParser from 'cookie-parser';
 
 export const postUserData = async (req,res) =>{
     try {
@@ -128,6 +126,24 @@ export const addToCart = async (req, res) => {
     }
 };
 
+export const removeFromCart = async (req, res) => {
+    const { userId, productId } = req.body;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.cart = user.cart.filter(item => item.productId.toString() !== productId);
+        await user.save();
+
+        return res.status(200).json({ message: 'Item removed from cart successfully!', success: true, cart: user.cart });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
 
 
 export const addPaymentMethod = async (req, res) => {
@@ -147,6 +163,35 @@ export const addPaymentMethod = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 };
+
+export const placeOrder = async (req, res) => {
+    const { userId, orderDetails } = req.body;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const newOrder = new Order({
+            user: userId,
+            items: user.cart,
+            orderDetails,
+            status: 'Pending'
+        });
+
+        await newOrder.save();
+
+        // Clear the user's cart after placing the order
+        user.cart = [];
+        await user.save();
+
+        return res.status(200).json({ message: 'Order placed successfully!', success: true, order: newOrder });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
 
 export const loginUser = async (req, res) => {
     try {

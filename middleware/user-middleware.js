@@ -24,6 +24,7 @@ export const Middleware = async (req, res, next) => {
 
 export const roleBasedMiddleware = (...allroles) => {
     return (async (req, res, next) => {
+        console.log(req.user.role);
         try {
             if(!allroles.includes(req.user.role)){
                 return res.status(403).json({message: "You are not authorized to access this route"});

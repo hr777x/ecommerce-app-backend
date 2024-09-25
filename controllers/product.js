@@ -78,6 +78,20 @@ export const getProductbyUser = async (req, res) => {
     }
 };
 
+export const viewProductsByCategory = async (req, res) => {
+    const { category } = req.params;
+
+    try {
+        const products = await Product.find({ category });
+        if (!products.length) {
+            return res.status(404).json({ message: 'No products found in this category' });
+        }
+        return res.status(200).json({ success: true, products });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
 export const addReview = async (req, res) => {
     try {
         const { productId } = req.params;
