@@ -9,6 +9,7 @@ export const postUserData = async (req,res) =>{
     try {
         const {name, userName, password, email, cardNumber, expiryDate, cvv} = req.body;
         console.log(req.body);
+        const image = req.file.filename;
         const isEmailExisting = await User.findOne({email : email});
         if(isEmailExisting){
             return res.status(400).json({message: "Email already exists"});
@@ -20,7 +21,8 @@ export const postUserData = async (req,res) =>{
             email,
             cardNumber,
             expiryDate,
-            cvv
+            cvv,
+            image
         })
 
         await userData.save()

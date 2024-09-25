@@ -39,6 +39,9 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['customer', 'admin', 'superadmin'], // Enum to restrict roles to specific values
         default: 'customer', // Default role for new users
+    },
+    image: {
+        type : String
     }
 }, {
     timestamps: true

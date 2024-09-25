@@ -4,7 +4,7 @@ export const Middleware = async (req, res, next) => {
     try {
         req.headers.authorization && req.headers.authorization.startsWith("Bearer ")
         const token = req.headers.authorization.split(" ")[1];
-        console.log("llll"+ token);
+        console.log(token);
         if(!token){
         return res.status(403).json({message: "Token Invalid"});
     }
@@ -20,4 +20,17 @@ export const Middleware = async (req, res, next) => {
         return res.status(500).json({ message: error.message });
         
     }
+}
+
+export const roleBasedMiddleware = (...allroles) => {
+    return (async (req, res, next) => {
+        try {
+            if(!allroles.includes(req.user.role)){
+                return res.status(403).json({message: "You are not authorized to access this route"});
+            }
+            next();
+        } catch (error) {
+            res.status(500).json({ message: error.message});
+        }
+    }) 
 }
