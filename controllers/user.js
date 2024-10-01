@@ -1,5 +1,6 @@
 import User from '../models/user-model.js';
 import Product from '../models/product-model.js';
+import Order from '../models/order-model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -135,7 +136,7 @@ export const removeFromCart = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        user.cart = user.cart.filter(item => item.productId.toString() !== productId);
+        user.cart = user.cart.filter(item => item.productId !== productId);
         await user.save();
 
         return res.status(200).json({ message: 'Item removed from cart successfully!', success: true, cart: user.cart });
@@ -165,19 +166,35 @@ export const addPaymentMethod = async (req, res) => {
 };
 
 export const placeOrder = async (req, res) => {
-    const { userId, orderDetails } = req.body;
-
     try {
-        const user = await User.findById(userId);
+        const { userId, shippingAddress, contactInfo } = req.body;
+
+        const user = await User.findById(userId).populate('cart.product');
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
+        if (!user.cart.length) {
+            return res.status(400).json({ message: 'Cart is empty' });
+        }
+
+        // Calculate the total price of the order
+        const totalPrice = user.cart.reduce((acc, item) => {
+            return acc + (item.product.price * item.quantity);
+        }, 0);
+
+        // Create the new order
         const newOrder = new Order({
             user: userId,
-            items: user.cart,
-            orderDetails,
-            status: 'Pending'
+            items: user.cart.map(item => ({
+                product: item.product._id,
+                quantity: item.quantity
+            })),
+            paymentMethod: user.paymentMethod,
+            shippingAddress,
+            contactInfo,
+            totalPrice,
+            orderStatus: 'Pending'
         });
 
         await newOrder.save();
@@ -191,6 +208,7 @@ export const placeOrder = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 };
+
 
 
 export const loginUser = async (req, res) => {

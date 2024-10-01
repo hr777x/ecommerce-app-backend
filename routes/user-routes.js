@@ -14,7 +14,7 @@ userRoute.post('/addToCart', addToCart);
 userRoute.post('/addPaymentMethod', addPaymentMethod);
 userRoute.post('/login', loginUser);
 userRoute.post('/register', registerUser);
-userRoute.post('/logout', Middleware, roleBasedMiddleware(['customer','admin']), logoutUser);
+userRoute.post('/logout', Middleware, roleBasedMiddleware('customer','admin'), logoutUser);
 userRoute.post('/removeFromCart', removeFromCart);
 userRoute.post('/placeOrder', placeOrder);
 

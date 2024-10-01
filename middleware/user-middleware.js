@@ -20,7 +20,7 @@ export const Middleware = async (req, res, next) => {
         return res.status(500).json({ message: error.message });
         
     }
-}
+};
 
 export const roleBasedMiddleware = (...allroles) => {
     return (async (req, res, next) => {
@@ -34,4 +34,4 @@ export const roleBasedMiddleware = (...allroles) => {
             res.status(500).json({ message: error.message});
         }
     }) 
-}
+};
